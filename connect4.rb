@@ -2,7 +2,9 @@
 load 'player.rb'
 load 'board.rb'
 
-#Tell players about game rules
+
+#Tell players about game rules --- will consider revamping this introduction and prompt for game mode etc into a separate method if i can get the
+#other shit to work
 gametype = "asd"
 
 unless gametype == 'PVP' || gametype == 'AI' 
@@ -20,32 +22,44 @@ if gametype == 'PVP'
 end
 
 #prompt for players definitions and shovel them into @players
-@players = [Player.new(:name => player1, :species => "human", :symbol => "X"), Player.new(:name => player1, :species => "human", :symbol => "O")] if gametype == 'PVP'
-@players = [Player.new(:name => player1, :species => "human", :symbol => "X"), Player.new(:name => player1, :species => "AI", :symbol => "O")] if gametype == 'AI'
+players = [Player.new(:name => player1, :species => "human", :symbol => "X"), Player.new(:name => player1, :species => "human", :symbol => "O")] if gametype == 'PVP'
+players = [Player.new(:name => player1, :species => "human", :symbol => "X"), Player.new(:name => player1, :species => "AI", :symbol => "O")] if gametype == 'AI'
 
 #turn system
-@current_player_indice = 0
-#needs to be fixed
+current_player_indice = 0
+
 def next_player
-	@current_player_indice = (@current_player_indice + 1) % @players.size
+	current_player_indice = (current_player_indice + 1) % players.size
 end
 def current_player
-	return @players[current_player_indice]
+	return players[current_player_indice]
 end
-def prompt_move(current_player)
-  puts " #{current_player}'s turn. Choose a column!",
+def prompt_move(player)
+  puts " #{player}'s turn. Choose a column!",
   col_num = gets.chomp.to_i - 1
   return col_num
 end
 
 #clearing the screen
   def refresh
-  	puts "\n" * 10
+  	puts "\n" * 50
   end 
 
-#make sure the move is valid i.e. the column isn't full, the column exists etc.
-#check win conditions i.e. horizontally, vertically and diagonally with each new move so that there's less to think about, using and statements?
-#alert players that one of them has won
+#game engine
+  def game_engine
+    while false
+      active = current_player
+      col_num = prompt_move(active)
+      #while !valid_move(col_num) do prints "Please choose another column which is NOT filled up and ON the board"
+     # 	col_num = prompt_move(active)
+     # end 
+      drop_piece(col_num) #@row now contains the row number of that the piece was dropped into
+      board.printboard
+      return true if board.win #check winning conditions
+      board.row = 0
+      next_player #change current_player indice to be set for next player.
+    end
+  end
 
 #instantiate board class object.
   def connect4(boardClass)
@@ -54,19 +68,7 @@ end
   	board.printCoords
   	refresh
   	board.printboard
-
-    while false
-      active = current_player
-      col_num = prompt_move(active)
-      while !valid_move(col_num) do prints "Please choose another column which is NOT filled up and ON the board"
-      	col_num = prompt_move(active)
-      end 
-      drop_piece(col_num) #@row now contains the row number of that the piece was dropped into
-      board.printboard
-      return true if board.win #check winning conditions
-      board.row = 0
-      next_player #change current_player indice to be set for next player.
-    end
+  	game_engine
   end
 
 connect4(Board)

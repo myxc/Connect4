@@ -62,7 +62,7 @@ class Board
 #win conditions:
   #straight wins
   def straight_check_col
-    in_a_row_counter = 0
+    in_a_col_counter = 0
     row_up_iterater = 4
     row_down_iterater = 6
 
@@ -75,26 +75,32 @@ class Board
         row_down_iterater += 1
         in_a_col_counter += 1
       end
-      break if in_a_row_counter == 3
-      puts "#{current_player} is the winner!"
+      break if in_a_col_counter == 3
+      if in_a_col_counter == 3 
+        puts "#{current_player} is the winner!"
+        return true
+      end
     end
   end
   
   def straight_check_row
-    in_a_col_counter = 0
+    in_a_row_counter = 0
     col_left_iterater = 1
     col_right_iterater = 1
     2.times do #check for wins in that row
       if (0 <= (col_num + col_right_iterater) <= 6) and current_player.player_piece == @board[(5 - @row)][col_num + col_right_iterater]
         col_right_iterater += 1
-        in_a_col_counter += 1
+        in_a_row_counter += 1
       end
       if (0 <= (col_num - col_left_iterater) <= 6) and current_player.player_piece == @board[(5 - @row)][col_num - col_left_iterater]
         col_left_iterater += 1
-        in_a_col_counter += 1
+        in_a_row_counter += 1
       end
       break if in_a_row_counter == 3
-      puts "#{current_player} is the winner!"
+      if in_a_row_counter == 3 
+        puts "#{current_player} is the winner!"
+        return true
+      end
     end
   end
 
@@ -117,7 +123,10 @@ class Board
         fwd_diag_counter += 1
       end
       break if fwd_diag_counter == 3 
-      puts "#{current_player} is the winner!"
+      if fwd_diag_counter == 3 
+        puts "#{current_player} is the winner!"
+        return true
+      end
     end
   end
 
@@ -139,7 +148,10 @@ class Board
         bwd_diag_counter += 1
       end
       break if bwd_diag_counter == 3 
-      puts "#{current_player} is the winner!"
+      if bwd_diag_counter == 3 
+        puts "#{current_player} is the winner!"
+        return true
+      end
     end
   end
 
