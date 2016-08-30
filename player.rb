@@ -4,7 +4,7 @@ class Player
     @species = attrs[:species]
     @player_piece = attrs[:symbol]
   end
-  attr_reader :species, :player_piece
+  attr_reader :species, :player_piece, :name
 end 
 #species of the player will determine if there will be a CPU in the game.
 #the player_piece of each player will be based off who was the first player to be created

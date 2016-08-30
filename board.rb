@@ -1,10 +1,9 @@
+load 'player.rb'
 class Board
   def initialize
     @board = Array.new(6) { Array.new(7, "0") }
     @row = 0
   end
-
-  attr_accessor :row
  
   def printCoords
     puts " COL  1   2   3   4   5   6   7 ",
@@ -56,6 +55,45 @@ class Board
     @board[-1 - @row][col_num] = current_player.player_piece
   end
 
+#game mode
+#Tell players about game rules --- will consider revamping this introduction and prompt for game mode etc into a separate method if i can get the
+#other shit to work
+def game_mode
+@gametype = "asd"
+unless @gametype == 'PVP' || @gametype == 'AI' 
+  puts "To start a two player game, please enter 'PVP'. To start a game against AI, please enter 'AI'"
+  @gametype = gets.chomp.to_s
+end
+
+puts "Please enter name for Player 1 "
+
+@player1 = gets.chomp.to_s
+
+if @gametype == 'PVP'
+  puts "Please enter name for Player 2\n "
+  @player2 = gets.chomp.to_s
+end
+
+#prompt for players definitions and shovel them into @players
+@players = [Player.new(:name => @player1, :species => "human", :symbol => "X"), Player.new(:name => @player2, :species => "human", :symbol => "O")] if @gametype == 'PVP'
+@players = [Player.new(:name => @player1, :species => "human", :symbol => "X"), Player.new(:name => "AI masterrace", :species => "AI", :symbol => "O")] if @gametype == 'AI'
+end
+#turn system
+@current_player_indice = 0
+
+def next_player
+  @current_player_indice = (@current_player_indice + 1) % @players.size
+end
+def current_player
+  return @players[@current_player_indice.to_i]
+end
+def prompt_move(player)
+  puts " #{player}'s turn. Choose a column!",
+  col_num = gets.chomp.to_i - 1
+  return col_num
+end
+
+attr_accessor :players, :row
 
 #@row contains the row number that the piece is dropped into and the column number is already known, these will be useful to find whether the surrounding 6 spaces
 #vertically/horizontally/diagonally will contain the tiles needed for a win
