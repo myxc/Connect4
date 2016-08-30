@@ -4,9 +4,11 @@ class Board
     @row = 0
   end
 
-  attr_reader :row :board 
+  attr_accessor :row
+ 
   def printCoords
-    puts "row6:(1)|(2)|(3)|(4)|(5)|(6)|(7)",
+    puts " COL  1   2   3   4   5   6   7 ",
+         "row6:(1)|(2)|(3)|(4)|(5)|(6)|(7)",
          "--------------------------------",
          "row5:(1)|(2)|(3)|(4)|(5)|(6)|(7)",
          "--------------------------------",
@@ -16,8 +18,7 @@ class Board
          "--------------------------------",
          "row2:(1)|(2)|(3)|(4)|(5)|(6)|(7)",
          "--------------------------------",
-         "row1:(1)|(2)|(3)|(4)|(5)|(6)|(7)",
-    print "\n"
+         "row1:(1)|(2)|(3)|(4)|(5)|(6)|(7)"
   end
 
   def printboard
@@ -25,6 +26,7 @@ class Board
       (0..6).each do |col|
         print @board[-1 - row][col]
         print "|" unless col == 6
+        print "\n" if col == 6
       end
       print "-------------\n" unless row == 5
     end
@@ -36,7 +38,7 @@ class Board
 
   def has_room(col_num)
     (0..5).any? do |row|
-  	  next unless @board[-1 - row][col_num] == 0
+  	  @board[-1 - row][col_num] == 0
     end
   end
 
@@ -73,8 +75,8 @@ class Board
         row_down_iterater += 1
         in_a_col_counter += 1
       end
-      if in_a_row_counter == 3 break prints "#{current_player} is the winner!"
-      end
+      break if in_a_row_counter == 3
+      puts "#{current_player} is the winner!"
     end
   end
   
@@ -91,10 +93,11 @@ class Board
         col_left_iterater += 1
         in_a_col_counter += 1
       end
-      if in_a_col_counter == 3 break prints "#{current_player} is the winner!"
-      end
+      break if in_a_row_counter == 3
+      puts "#{current_player} is the winner!"
     end
   end
+
   #diagonal wins
   def fwd_diag_check
     fwd_diag_counter = 0
@@ -113,8 +116,8 @@ class Board
         row_down_iterater += 1
         fwd_diag_counter += 1
       end
-      if fwd_diag_counter == 3 break prints "#{current_player} is the winner!"
-      end
+      break if fwd_diag_counter == 3 
+      puts "#{current_player} is the winner!"
     end
   end
 
@@ -135,22 +138,34 @@ class Board
         row_up_iterater -= 1
         bwd_diag_counter += 1
       end
-      if bwd_diag_counter == 3 break prints "#{current_player} is the winner!"
-      end
+      break if bwd_diag_counter == 3 
+      puts "#{current_player} is the winner!"
     end
   end
 
   #ties
   def ties
-    (0..6).each do |col_num| has_room(col_num)? break return false : break return true
+    false
+    tie_token = 0 #each filled column will increment tie token by 1 and if it reaches 7 it means board is full and game is tied
+    (0..6).each do |col_num| has_room(col_num)? break : tie_token += 1
+    end
+    return true if tie_token == 7
   end
 
   def win 
-    if ties == true prints "Both players have ended the game in a tie" return true
+    if ties == true 
+      puts "Both players have ended the game in a tie"
+      return true 
     end
     if (straight_check_row || straight_check_col) || (fwd_diag_check || bwd_diag_check)
-      prints "#{current_player} is the winner!" return true
+      puts "#{current_player} is the winner!" 
+      return true
+    end
+    return false
   end
+
+end
+
 
 
 

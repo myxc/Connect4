@@ -1,26 +1,27 @@
-require board.rb
-require player.rb
+
+load 'player.rb'
+load 'board.rb'
 
 #Tell players about game rules
-gametype = nil
+gametype = "asd"
 
-unless gametype == 'PVP' || 'AI' 
-  print "To start a two player game, please enter 'PVP'. To start a game against AI, please enter 'AI'\n"
-  gametype = gets.chomp
+unless gametype == 'PVP' || gametype == 'AI' 
+  puts "To start a two player game, please enter 'PVP'. To start a game against AI, please enter 'AI'"
+  gametype = gets.chomp.to_s
 end
 
-prints "Please enter name for Player 1\n "
+puts "Please enter name for Player 1 "
 
-player1 = gets.chomp
+player1 = gets.chomp.to_s
 
 if gametype == 'PVP'
-  prints "Please enter name for Player 2\n "
-  player2 = gets.chomp
+  puts "Please enter name for Player 2\n "
+  player2 = gets.chomp.to_s
 end
 
 #prompt for players definitions and shovel them into @players
-@players = [Player.new(:name => player1, :species => human, :symbol => "X"), Player.new(:name => player1, :species => human, :symbol => "O")] if gametype == 'PVP'
-@players = [Player.new(:name => player1, :species => human, :symbol => "X"), Player.new(:name => player1, :species => AI, :symbol => "O")] if gametype == 'AI'
+@players = [Player.new(:name => player1, :species => "human", :symbol => "X"), Player.new(:name => player1, :species => "human", :symbol => "O")] if gametype == 'PVP'
+@players = [Player.new(:name => player1, :species => "human", :symbol => "X"), Player.new(:name => player1, :species => "AI", :symbol => "O")] if gametype == 'AI'
 
 #turn system
 @current_player_indice = 0
@@ -39,7 +40,7 @@ end
 
 #clearing the screen
   def refresh
-  	puts "\n" * 100
+  	puts "\n" * 10
   end 
 
 #make sure the move is valid i.e. the column isn't full, the column exists etc.
@@ -47,35 +48,36 @@ end
 #alert players that one of them has won
 
 #instantiate board class object.
-  def connect4(Board = Board)
-  	board = Board.new
+  def connect4(boardClass)
+  	board = boardClass.new
   	refresh
   	board.printCoords
+  	refresh
+  	board.printboard
 
-    while not board.win
-      @current_player = current_player
-      col_num = prompt_move(@current_player)
-      while !valid_move(col_num) prints "Please choose another column which is NOT filled up and ON the board"
-      	col_num = prompt_move(@current_player)
+    while false
+      active = current_player
+      col_num = prompt_move(active)
+      while !valid_move(col_num) do prints "Please choose another column which is NOT filled up and ON the board"
+      	col_num = prompt_move(active)
       end 
       drop_piece(col_num) #@row now contains the row number of that the piece was dropped into
       board.printboard
-      board.win #check winning conditions
+      return true if board.win #check winning conditions
+      board.row = 0
       next_player #change current_player indice to be set for next player.
     end
   end
 
 connect4(Board)
 
-while true
-  refresh
-  puts "Want to play again? (y/n)" 
-  if ["no", "n"].include? (gets.chomp.downcase)
-  	puts "Hope you had fun, goodbye"
-  	break
-  end
-  if ["yes", "y"].include? (gets.chomp.downcase)
-  	puts "Okay game will restart"
-  	connect4(Board)
-  end
-end
+#while true
+#  refresh
+#  puts "Want to play again? (y/n)" 
+#  if ["no", "n"].include? (gets.chomp.downcase)
+#  	puts "Hope you had fun, goodbye"
+#  	break
+#  end
+#  puts "Okay game will restart"
+#  connect4(Board)
+#end
