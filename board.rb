@@ -4,6 +4,7 @@ class Board
     @row = 0
   end
 
+  attr_reader :row :board 
   def printCoords
     puts "row6:(1)|(2)|(3)|(4)|(5)|(6)|(7)",
          "--------------------------------",

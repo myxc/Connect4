@@ -1,5 +1,6 @@
 require board.rb
 require player.rb
+
 #Tell players about game rules
 gametype = nil
 
@@ -84,15 +85,33 @@ end
     col_right_iterater = 1
   end
   #diagonal wins
-  
+  def backslash_diag_check
+  	back_diag_counter = 0
+    row_up_iterater = 4
+    row_down_iterater = 6
+    col_left_iterater = 1
+    col_right_iterater = 1
+  	2.times do #will need to finesse this and get the logistics right.
+      if (0 <= (col_num + col_right_iterater) <= 6) and (0 <= (row_up_iterater - @row) <= 5)
+      	col_right_iterater += 1
+      	in_a_col_counter += 1
+      end
+
+  end
+
+  def forwardslash_diag_check
+  	...
+  end
+
   #ties
   def ties
     (0..6).each do |col_num| has_room(col_num)? break return false : break return true
   end
 
   def win 
-  	if ties == true prints "Both players have ended the game in a tie"
-    (straight_check_row || straight_check_col) || (diag_check
+  	if ties == true prints "Both players have ended the game in a tie" return true
+  	end
+    if (straight_check_row || straight_check_col) || (diag_check
   end
 
 #make sure the move is valid i.e. the column isn't full, the column exists etc.
