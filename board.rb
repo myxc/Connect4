@@ -51,11 +51,106 @@ class Board
       @row = row
       break
     end
-    @board[-1 - @row][col_num] = @player_piece
+    @board[-1 - @row][col_num] = current_player.player_piece
   end
 
 
+#@row contains the row number that the piece is dropped into and the column number is already known, these will be useful to find whether the surrounding 6 spaces
+#vertically/horizontally/diagonally will contain the tiles needed for a win
+#win conditions:
+  #straight wins
+  def straight_check_col
+    in_a_row_counter = 0
+    row_up_iterater = 4
+    row_down_iterater = 6
 
+    2.times do #check for wins in that column
+      if (0 <= (row_up_iterater - @row) <= 5) and current_player.player_piece == @board[(row_up_iterater - @row)][col_num]
+        row_up_iterater -= 1
+        in_a_col_counter += 1
+      end
+      if (0 <= (row_down_iterater - @row) <= 5) and current_player.player_piece == @board[(row_down_iterater - @row)][col_num]
+        row_down_iterater += 1
+        in_a_col_counter += 1
+      end
+      if in_a_row_counter == 3 break prints "#{current_player} is the winner!"
+      end
+    end
+  end
+  
+  def straight_check_row
+    in_a_col_counter = 0
+    col_left_iterater = 1
+    col_right_iterater = 1
+    2.times do #check for wins in that row
+      if (0 <= (col_num + col_right_iterater) <= 6) and current_player.player_piece == @board[(5 - @row)][col_num + col_right_iterater]
+        col_right_iterater += 1
+        in_a_col_counter += 1
+      end
+      if (0 <= (col_num - col_left_iterater) <= 6) and current_player.player_piece == @board[(5 - @row)][col_num - col_left_iterater]
+        col_left_iterater += 1
+        in_a_col_counter += 1
+      end
+      if in_a_col_counter == 3 break prints "#{current_player} is the winner!"
+      end
+    end
+  end
+  #diagonal wins
+  def fwd_diag_check
+    fwd_diag_counter = 0
+    row_up_iterater = 4
+    row_down_iterater = 6
+    col_left_iterater = 1
+    col_right_iterater = 1
+    2.times do 
+      if (0 <= (col_num + col_right_iterater) <= 6) and (0 <= (row_up_iterater - @row) <= 5) and current_player.player_piece == @board[row_up_iterater - @row][col_num + col_right_iterater]
+        col_right_iterater += 1
+        row_up_iterater -= 1
+        fwd_diag_counter += 1
+      end
+      if (0 <= (col_num - col_left_iterater) <= 6) and (0 <= (row_down_iterater - @row) <= 5) and current_player.player_piece == @board[row_down_iterater - @row][col_num - col_left_iterater]
+        col_left_iterater += 1
+        row_down_iterater += 1
+        fwd_diag_counter += 1
+      end
+      if fwd_diag_counter == 3 break prints "#{current_player} is the winner!"
+      end
+    end
+  end
+
+  def bwd_diag_check
+    bwd_diag_counter = 0
+    row_up_iterater = 4
+    row_down_iterater = 6
+    col_left_iterater = 1
+    col_right_iterater = 1
+    2.times do 
+      if (0 <= (col_num + col_right_iterater) <= 6) and (0 <= (row_down_iterater - @row) <= 5) and current_player.player_piece == @board[row_down_iterater - @row][col_num + col_right_iterater]
+        col_right_iterater += 1
+        row_down_iterater += 1
+        bwd_diag_counter += 1
+      end
+      if (0 <= (col_num - col_left_iterater) <= 6) and (0 <= (row_up_iterater - @row) <= 5) and current_player.player_piece == @board[row_up_iterater - @row][col_num - col_left_iterater]
+        col_left_iterater += 1
+        row_up_iterater -= 1
+        bwd_diag_counter += 1
+      end
+      if bwd_diag_counter == 3 break prints "#{current_player} is the winner!"
+      end
+    end
+  end
+
+  #ties
+  def ties
+    (0..6).each do |col_num| has_room(col_num)? break return false : break return true
+  end
+
+  def win 
+    if ties == true prints "Both players have ended the game in a tie" return true
+    end
+    if (straight_check_row || straight_check_col) || (fwd_diag_check || bwd_diag_check)
+      prints "#{current_player} is the winner!" return true
+  end
 
 
 
