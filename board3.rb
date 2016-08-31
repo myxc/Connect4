@@ -5,8 +5,11 @@ class Board
 		@player1 = "X"
 		@player2 = "O"
 		@piece = "X"
-		@row = 4
+		@row = 0
 		@col = 3
+    @row_counter = Array.new(7, 0) #After you get @col input, check to see what row to put the piece based on the value in the corresponding element
+    #this value will increment after each time a piece is dropped into that column, and when the value reaches 5, it will indicate that the column is full 
+    #This way, ties will also be easy to see, because every element inside @row_counter will be 6 when board is full.
 	end
 	#turn system
 	def current_player
@@ -24,10 +27,8 @@ class Board
 	end 
 
 	def get_coords
-		puts "#{@piece} please enter the row and col number that you want to drop your piece into \n"
-		puts "Row: "
-		@row = (gets.chomp.to_i) - 1 #user input stored into row
-		puts "\n Col: "
+		puts "#{@piece} please enter the number for the column that you want to drop your piece into \n"
+		puts "Col: "
 		@col = (gets.chomp.to_i) - 1 #user input stored into col
 	end
 
@@ -59,43 +60,31 @@ class Board
   end
 
   #move mechanics
-  def inside_board #true as long as @col_num has a value between 0 and 6 aka will be in element 1 thru 7 on any row
-    if 0 <= @col && @col <= 6
-      if 0 <= @row && @row <= 5
-      	return true
-      else 
-      	return false
+  def has_room #take @col value and check if there's room, reprompting for another @col value if this returns false.
+    if (0 <= @col) && (@col <= 6) #input @col is on the board
+      if @row_counter[@col] <= 5 #that column has room
+        puts "has room" #for debug pursposes
+        @row = (5 - (@row_counter[@col])) #set @row value to be the same as the value of the row available
+        return true #return true for chaining purposes
+      end
+      if @row_counter[@col] == 6 #if row is full
+        puts "that column is full boi" #debug msg
+        return false #return false to show there's no room
       end
     else
-    	return false
+      puts "your column value is not on the board"
+      return false
     end
   end
 
-  def valid_drop #based on given row and col
-  	if inside_board 	#valid is empty and also inside grid and has no empty cells below it
-  		if @board[@row][@col] == " "
-  		  puts "you good"
-  		  return true
-  		else 
-  			puts "aint empty"
-  			return false
-  		end
-  	else
-  		puts "aint vlid"
-  		return false
-  	end
-  end
-
-  def drop_piece
-    if valid_drop == true 
-    	@board[@row][@col] = @piece 
-    	puts "piece got dropped"
-    	return true 
-    else
-    	puts "your row and/or col values are not valid" 
-    	return false
+  def drop_piece #drops the piece after you've made sure that there won't be any hiccups
+    if has_room == true #has room means theres an empty row and the column is on the board
+    	@board[@row][@col] = @piece  #assign that empty row with the piece
+    	puts "piece got dropped" #debug msg
+      @row_counter[@col] += 1 #increment the value of the row counter
     end
   end
+
   #ternary is mainly for assignments, and can only handle one operation on either side of the : 
 
   #win conditions:
@@ -120,7 +109,7 @@ class Board
       end
     end
     if @in_a_col_counter == 3 
-      puts "#{@piece} won with that horiz column of #{piece}'s!"
+      puts "#{@piece} won with that vert column of #{piece}'s!"
       return true
     else
     	return false
@@ -178,7 +167,7 @@ class Board
       end
     end
     if @fwd_diag_counter == 3 
-      puts "#{@piece} won with that horiz column of #{piece}'s!"
+      puts "#{@piece} won with that fwd diag of #{piece}'s!"
       return true
     else
     	return false
@@ -209,7 +198,7 @@ class Board
       end
     end
     if @bwd_diag_counter == 3 
-      puts "#{@piece} won with that horiz column of #{piece}'s!"
+      puts "#{@piece} won with that bwd diag column of #{piece}'s!"
       return true
     else
     	return false
@@ -217,7 +206,19 @@ class Board
   end
 
   def ties
-    @board.join.split(' ').include?(" ")  
+    @tie_counter = 0 #counter for how many columns are full
+    (0..6).each do |col| #for columns 0 to 6 aka all 7 columns
+      if @row_counter[col] == 6 #if the row counter is 6 then that column is full
+        @tie_counter += 1 #increment tie counter
+      else
+        break #break out of this block if any column is not full
+      end
+    end
+    if @tie_counter == 7 #all columns are filled
+      return true #true to ties
+    else
+      return false #false to ties
+    end
   end
 
   def find_win
@@ -227,19 +228,19 @@ class Board
   	fwd_diag_check
   	bwd_diag_check
   	if straight_check_row
-  		puts "#{@piece}, you have won the game"
+  		puts "#{@piece}, you have won the game with 4 in a row"
   		return true
   	end
-  	if straight_check_row
-  		puts "#{@piece}, you have won the game"
+  	if straight_check_col
+  		puts "#{@piece}, you have won the game with 4 in a column"
   		return true
   	end
   	if fwd_diag_check
-  		puts "#{@piece}, you have won the game"
+  		puts "#{@piece}, you have won the game with 4 diagonally"
   		return true
   	end
    	if bwd_diag_check
-  		puts "#{@piece}, you have won the game"
+  		puts "#{@piece}, you have won the game with 4 diagonally"
   		return true
   	end
   	if ties == true
