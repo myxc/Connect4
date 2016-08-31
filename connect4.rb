@@ -1,13 +1,15 @@
 load 'board.rb'
-
+loard 'player.rb'
 #clearing the screen
   def refresh
   	puts "\n" * 5
   end 
-
+  
 #instantiate board class object.
   def connect4(boardClass)
   	board = boardClass.new
+    players = Player.create
+    players.
   	refresh
   	board.testboard
   	#board.game_mode #decide on PVP or AI and enter char names
