@@ -1,10 +1,42 @@
+load 'player.rb'
 class Board
 
 	def intialize
 		@board = Array.new(6){Array.new(7,"0")}
+		@player1 = Player.new("player1", "human", "X")
+		@player2 = Player.new("player2", "human", "O")
+		@piece = "X"
+		@current_player = @players[0]
+		@player_name = "filler"
+		@row = 4
+		@col = 3
 	end
 
-  def printboard #prints from elements of @board which are separated by | and ---
+	#turn system
+	def current_player
+		@piece = @current_player.player_piece
+		@player_name = @current_player.player_name
+	end
+
+	def next_player
+		if @current_player == @player1
+		  @current_player = @players2
+		else
+			@current_player = @players1
+		end
+		@piece = @current_player.player_piece #set new player's piece as "piece"
+		@player_name = @current_player.name #ditto for name
+	end 
+
+	def get_coords
+		puts "#{current_player.name} please enter the row and col number that you want to drop your piece into \n"
+		puts "Row: "
+		@row = (gets.chomp.to_i) - 1 #user input stored into row
+		puts "\n Col: "
+		@col = (gets.chomp.to_i) - 1 #user input stored into col
+	end
+
+  def print_board #prints from elements of @board which are separated by | and ---
     (0..5).each do |row|
       (0..6).each do |col|
         print @board[row][col]
@@ -15,7 +47,7 @@ class Board
     end
   end
 
-  def printCoords #grid layout
+  def print_coords #grid layout
     puts " COL  1   2   3   4   5   6   7 ",
          "row1:(1)|(2)|(3)|(4)|(5)|(6)|(7)",
          "--------------------------------",
@@ -36,7 +68,7 @@ class Board
     0 <= row && row <= 5
   end
   
-  def first_empty_row #block iterates between the row directly below given row and the bottom of grid
+  def first_empty_row(row) #block iterates between the row directly below given row and the bottom of grid
 	  ((row + 1)..5).each do |row_num| 
 		  if @board[row_num][col] == " " #if any of these rows below the given row coord is empty
 			  print "You can't skip an empty row boi" #msg saying so
@@ -47,12 +79,19 @@ class Board
 	end
 
   def valid_drop(row, col) #based on given row and col
-  	return true if @board[row][col] == " " && (inside_board and first_empty_row) 	#valid is empty and also inside grid and has no empty cells below it
+  	return true if @board[row][col] == " " && (inside_board(row, col) and first_empty_row(row)) 	#valid is empty and also inside grid and has no empty cells below it
   end
 
   def drop_piece(piece, row, col) 
-    @board[row][col] = piece if valid_drop #put piece down in this spot 
+    if valid_drop == true 
+    	@board[row][col] = piece 
+    	return true 
+    else
+    	puts "your row and/or col values are not valid" 
+    	return false
+    end
   end
+  #ternary is mainly for assignments, and can only handle one operation on either side of the : 
 
   #win conditions:
   #straight wins
@@ -61,7 +100,7 @@ class Board
     row_up_iterater = 1
     row_down_iterater = 1
 
-    2.times do #check for wins in that column
+    3.times do #check for wins in that column
       if (0 <= (row - row_up_iterater) && (row - row_up_iterater) <= 5) and @board[row][col] == board[row - row_up_iterater][col] #checks up that column
         row_up_iterater += 1 #if that cell is the same then increments the row iterater so next loop will check the one even farther out
         in_a_col_counter += 1 #increments column counter if it is the same
@@ -82,7 +121,7 @@ class Board
     in_a_row_counter = 0
     col_left_iterater = 1
     col_right_iterater = 1
-    2.times do #check for wins in that row
+    3.times do #check for wins in that row
       if (0 <= (col + col_right_iterater) && (col + col_right_iterater) <= 6) and piece == @board[row][col + col_right_iterater]
         col_right_iterater += 1
         in_a_row_counter += 1
@@ -106,7 +145,7 @@ class Board
     row_down_iterater = 1
     col_left_iterater = 1
     col_right_iterater = 1
-    2.times do 
+    3.times do 
       if (0 <= (col + col_right_iterater) && (col + col_right_iterater) <= 6) and (0 <= (row - row_up_iterater) && (row - row_up_iterater ) <= 5) and @board[row][col] == @board[row - row_up_iterater][col + col_right_iterater]
         col_right_iterater += 1
         row_up_iterater += 1
@@ -131,7 +170,7 @@ class Board
     row_down_iterater = 6
     col_left_iterater = 1
     col_right_iterater = 1
-    2.times do 
+    3.times do 
       if (0 <= (col + col_right_iterater) && (col + col_right_iterater) <= 6) and (0 <= (row + row_down_iterater) && (row + row_down_iterater) <= 5) and @board[row][col] == @board[row + row_down_iterater][col + col_right_iterater]
         col_right_iterater += 1
         row_down_iterater += 1
@@ -164,11 +203,23 @@ class Board
   end
 
   def check_all_col(col) #does break break out of the if statement or the block
+  	col_full = true #
   	(0..5).each do |row| 
   		next unless @board[row][col] == " " #skips this iteration/this row unless this cell is empty
-  		  break #if empty then stop iterating set check_all_col to false
-  		  return false
-  		end
-  		return true #if block runs to completion then return true
+  		  break #if empty then stop iterating set col_full
+  		  col_full = false
   	end
+    return col_full
   end
+
+  def find_win(piece, row, col)
+  	if (straight_check_row(piece, row, col) || straight_check_row(piece, row, col)) || (fwd_diag_check(piece, row, col) || bwd_diag_check(piece, row, col))
+  		puts "#{@player_name}, you have won the game"
+  		return true
+  	elsif ties == true
+  		puts "You've ended the game in a tie"
+  		return true
+  	end
+  	return false
+  end
+end
