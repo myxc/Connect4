@@ -1,12 +1,13 @@
 class Board
-	attr_accessor :board, :player1, :row, :col, :piece, :player1, :player2
+	attr_accessor :board, :player1, :row, :col, :piece, :player1, :player2, :AI_mode
 	def initialize
 		@board = Array.new(6) { Array.new(7," ")}
 		@player1 = "X"
 		@player2 = "O"
 		@piece = "X"
 		@row = 0
-		@col = 3
+		@col = 8
+    @AI_mode = "OFF"
     @row_counter = Array.new(7, 0) #After you get @col input, check to see what row to put the piece based on the value in the corresponding element
     #this value will increment after each time a piece is dropped into that column, and when the value reaches 5, it will indicate that the column is full 
     #This way, ties will also be easy to see, because every element inside @row_counter will be 6 when board is full.
@@ -23,13 +24,29 @@ class Board
 		else
 			@current_player = @player1
 		end
+    puts "player changed"
 		@piece = @current_player #set new player's piece as "piece"
 	end 
 
 	def get_coords
-		puts "#{@piece} please enter the number for the column that you want to drop your piece into \n"
-		puts "Col: "
-		@col = (gets.chomp.to_i) - 1 #user input stored into col
+		if @AI_mode == "ON"
+      if @current_player == @player2
+        @col = rand(0..6)
+        puts "using rando powers"
+      end
+      if @current_player == @player1
+        puts "#{@piece} please enter the number for the column that you want to drop your piece into \n"
+		    puts "Col: "
+        puts " from ai true branch"
+		    @col = (gets.chomp.to_i) - 1 #user input stored into col
+      end
+    else 
+      puts "#{@piece} please enter the number for the column that you want to drop your piece into \n"
+      puts "Col: "
+      puts "from else branch"
+      puts "#{@AI_mode}"
+      @col = (gets.chomp.to_i) - 1 #user input stored into col
+    end
 	end
 
 
@@ -78,11 +95,9 @@ class Board
   end
 
   def drop_piece #drops the piece after you've made sure that there won't be any hiccups
-    if has_room == true #has room means theres an empty row and the column is on the board
     	@board[@row][@col] = @piece  #assign that empty row with the piece
     	puts "piece got dropped" #debug msg
       @row_counter[@col] += 1 #increment the value of the row counter
-    end
   end
 
   #ternary is mainly for assignments, and can only handle one operation on either side of the : 
