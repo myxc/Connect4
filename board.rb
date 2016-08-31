@@ -1,11 +1,11 @@
 load 'player.rb'
 class Board
   def initialize
-    @board = Array.new(6) { Array.new(7, "0") }
+    @board = Array.new(6) { Array.new(7, " ") }
     @row = 0
   end
  
-  def printCoords
+  def printCoords #prints game grid showing how columns and rows are numbered
     puts " COL  1   2   3   4   5   6   7 ",
          "row6:(1)|(2)|(3)|(4)|(5)|(6)|(7)",
          "--------------------------------",
@@ -20,10 +20,10 @@ class Board
          "row1:(1)|(2)|(3)|(4)|(5)|(6)|(7)"
   end
 
-  def printboard
+  def printboard #prints from elements of @board which are separated by | and ---
     (0..5).each do |row|
       (0..6).each do |col|
-        print @board[-1 - row][col]
+        print @board[row][col]
         print "|" unless col == 6
         print "\n" if col == 6
       end
@@ -31,72 +31,71 @@ class Board
     end
   end
 
-  def inside_board(col_num)
-    (0..6) == col_num
-  end
-
-  def has_room(col_num)
-    (0..5).any? do |row|
-  	  @board[-1 - row][col_num] == 0
-    end
-  end
-
-  def valid_move(col_num)
-    inside_board(col_num) and has_room(col_num)
-  end
-
-  def drop_piece(col_num)
-    (0..5).each do |row|
-      @row = 0
-      next unless @board[-1 - row][col_num] == 0
-      @row = row
-      break
-    end
-    @board[-1 - @row][col_num] = current_player.player_piece
-  end
-
-#game mode
-#Tell players about game rules --- will consider revamping this introduction and prompt for game mode etc into a separate method if i can get the
-#other shit to work
-def game_mode
-@gametype = "asd"
-unless @gametype == 'PVP' || @gametype == 'AI' 
-  puts "To start a two player game, please enter 'PVP'. To start a game against AI, please enter 'AI'"
-  @gametype = gets.chomp.to_s
-end
-
-puts "Please enter name for Player 1 "
-
-@player1 = gets.chomp.to_s
-
-if @gametype == 'PVP'
-  puts "Please enter name for Player 2\n "
-  @player2 = gets.chomp.to_s
-end
-
-#prompt for players definitions and shovel them into @players
-@players = [Player.new(:name => @player1, :species => "human", :symbol => "X"), Player.new(:name => @player2, :species => "human", :symbol => "O")] if @gametype == 'PVP'
-@players = [Player.new(:name => @player1, :species => "human", :symbol => "X"), Player.new(:name => "AI masterrace", :species => "AI", :symbol => "O")] if @gametype == 'AI'
-end
+@players = []
+@players[0] = Player.new("player1", "human", "X")
+@players[1] = Player.new("player2", "human", "O")
+e = @players.cycle
 #turn system
-@current_player_indice = 0
+
+attr_accessor :current_player, :row
+
+@current_player = @players[1]
+@piece = @current_player.player_piece
+@player_name = @current_player.name
 
 def next_player
-  @current_player_indice = (@current_player_indice + 1) % @players.size
-end
-def current_player
-  return @players[@current_player_indice.to_i]
-end
-def prompt_move(player)
-  puts " #{player}'s turn. Choose a column!",
-  col_num = gets.chomp.to_i - 1
-  return col_num
+  @current_player = e.peek if @current_player.player_piece == "X"
+  @current_player = e.next if @current_player.player_piece == "O"
+  @piece = @current_player.player_piece
+  @player_name = @current_player.name
 end
 
-attr_accessor :players, :row
+def prompt_move(current_player)
+  puts " #{current_player}'s turn. Choose a column!",
+  col_num = (gets.chomp.to_i - 1)
+  @col_num = col_num
+end
 
-#@row contains the row number that the piece is dropped into and the column number is already known, these will be useful to find whether the surrounding 6 spaces
-#vertically/horizontally/diagonally will contain the tiles needed for a win
+#move mechanics
+  def inside_board #true as long as @col_num has a value between 0 and 6 aka will be in element 1 thru 7 on any row
+    0 <= @col_num && @col_num <= 6
+  end
+
+  def has_room #true as long as any element in the entire column @col_num has value of " "
+    (0..5).any? do |row|
+  	  @board[row][@col_num] == " "
+    end
+  end
+
+  def valid_move #not a valid move unless both are true.
+    return false unless (inside_board == true) and (has_room == true)
+  end
+
+  def drop_piece
+    (0..5).each do |row_num| #iterate through each row
+      next unless @board[-1 - row_num][@col_num] == " " #skip to the next iteration/row unless the spot is empty (has value "0")
+      @row = row_num #set row var to this row because this is where the piece is placed
+      break #break out of block
+    end
+    @board[-1 - @row][@col_num] = @piece if valid_move(@col_num) #put piece down in this spot
+  end
+
+  def testboard
+    puts @piece
+    puts @current_player
+    puts @board[3][4]
+    puts @board[2]
+    @board[0][2] = "0"
+    @board[2][2] = "2"
+    @board[5][2] = "X"
+    @col_num = 3
+    drop_piece
+    @board[-1][3] = @piece
+    @board[-1][4] = @piece
+    puts @board[3][2]
+
+  end
+
 #win conditions:
   #straight wins
   def straight_check_col
@@ -105,17 +104,17 @@ attr_accessor :players, :row
     row_down_iterater = 6
 
     2.times do #check for wins in that column
-      if (0 <= (row_up_iterater - @row) <= 5) and current_player.player_piece == @board[(row_up_iterater - @row)][col_num]
+      if (0 <= (row_up_iterater - @row) && (row_up_iterater - @row) <= 5) and @piece == @board[(row_up_iterater - @row)][@col_num] #checks up that column
         row_up_iterater -= 1
         in_a_col_counter += 1
       end
-      if (0 <= (row_down_iterater - @row) <= 5) and current_player.player_piece == @board[(row_down_iterater - @row)][col_num]
+      if (0 <= (row_down_iterater - @row) && (row_down_iterater - @row) <= 5) and @piece == @board[(row_down_iterater - @row)][@col_num] #checks down that column
         row_down_iterater += 1
         in_a_col_counter += 1
       end
-      break if in_a_col_counter == 3
+      break if in_a_col_counter == 3 #if there's 
       if in_a_col_counter == 3 
-        puts "#{current_player} is the winner!"
+        puts "#{@player_name} is the winner!"
         return true
       end
     end
@@ -126,17 +125,17 @@ attr_accessor :players, :row
     col_left_iterater = 1
     col_right_iterater = 1
     2.times do #check for wins in that row
-      if (0 <= (col_num + col_right_iterater) <= 6) and current_player.player_piece == @board[(5 - @row)][col_num + col_right_iterater]
+      if (0 <= (@col_num + col_right_iterater) && (@col_num + col_right_iterater) <= 6) and @piece == @board[(5 - @row)][@col_num + col_right_iterater]
         col_right_iterater += 1
         in_a_row_counter += 1
       end
-      if (0 <= (col_num - col_left_iterater) <= 6) and current_player.player_piece == @board[(5 - @row)][col_num - col_left_iterater]
+      if (0 <= (@col_num - col_left_iterater) && (@col_num - col_left_iterater) <= 6) and @piece == @board[(5 - @row)][@col_num - col_left_iterater]
         col_left_iterater += 1
         in_a_row_counter += 1
       end
       break if in_a_row_counter == 3
       if in_a_row_counter == 3 
-        puts "#{current_player} is the winner!"
+        puts "#{@player_name} is the winner!"
         return true
       end
     end
@@ -150,19 +149,19 @@ attr_accessor :players, :row
     col_left_iterater = 1
     col_right_iterater = 1
     2.times do 
-      if (0 <= (col_num + col_right_iterater) <= 6) and (0 <= (row_up_iterater - @row) <= 5) and current_player.player_piece == @board[row_up_iterater - @row][col_num + col_right_iterater]
+      if (0 <= (@col_num + col_right_iterater) && (@col_num + col_right_iterater) <= 6) and (0 <= (row_up_iterater - @row) && (row_up_iterater - @row) <= 5) and @piece == @board[row_up_iterater - @row][@col_num + col_right_iterater]
         col_right_iterater += 1
         row_up_iterater -= 1
         fwd_diag_counter += 1
       end
-      if (0 <= (col_num - col_left_iterater) <= 6) and (0 <= (row_down_iterater - @row) <= 5) and current_player.player_piece == @board[row_down_iterater - @row][col_num - col_left_iterater]
+      if (0 <= (@col_num - col_left_iterater) && (@col_num - col_left_iterater) <= 6) and (0 <= (row_down_iterater - @row) && (row_down_iterater - @row) <= 5) and @piece == @board[row_down_iterater - @row][@col_num - col_left_iterater]
         col_left_iterater += 1
         row_down_iterater += 1
         fwd_diag_counter += 1
       end
       break if fwd_diag_counter == 3 
       if fwd_diag_counter == 3 
-        puts "#{current_player} is the winner!"
+        puts "#{@player_name} is the winner!"
         return true
       end
     end
@@ -175,19 +174,19 @@ attr_accessor :players, :row
     col_left_iterater = 1
     col_right_iterater = 1
     2.times do 
-      if (0 <= (col_num + col_right_iterater) <= 6) and (0 <= (row_down_iterater - @row) <= 5) and current_player.player_piece == @board[row_down_iterater - @row][col_num + col_right_iterater]
+      if (0 <= (@col_num + col_right_iterater) && (@col_num + col_right_iterater) <= 6) and (0 <= (row_down_iterater - @row) && (row_down_iterater - @row) <= 5) and @piece == @board[row_down_iterater - @row][@col_num + col_right_iterater]
         col_right_iterater += 1
         row_down_iterater += 1
         bwd_diag_counter += 1
       end
-      if (0 <= (col_num - col_left_iterater) <= 6) and (0 <= (row_up_iterater - @row) <= 5) and current_player.player_piece == @board[row_up_iterater - @row][col_num - col_left_iterater]
+      if (0 <= (@col_num - col_left_iterater) && (@col_num - col_left_iterater) <= 6) and (0 <= (row_up_iterater - @row) && (row_up_iterater - @row) <= 5) and @piece == @board[row_up_iterater - @row][@col_num - col_left_iterater]
         col_left_iterater += 1
         row_up_iterater -= 1
         bwd_diag_counter += 1
       end
       break if bwd_diag_counter == 3 
       if bwd_diag_counter == 3 
-        puts "#{current_player} is the winner!"
+        puts "#{@player_name} is the winner!"
         return true
       end
     end
@@ -208,7 +207,7 @@ attr_accessor :players, :row
       return true 
     end
     if (straight_check_row || straight_check_col) || (fwd_diag_check || bwd_diag_check)
-      puts "#{current_player} is the winner!" 
+      puts "#{@player_name} is the winner!" 
       return true
     end
     return false
