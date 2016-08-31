@@ -1,5 +1,5 @@
 load 'board.rb'
-loard 'player.rb'
+load 'player.rb'
 #clearing the screen
   def refresh
   	puts "\n" * 5
