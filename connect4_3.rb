@@ -8,7 +8,7 @@ def connect4(boardClass)
 	board = boardClass.new #create board class
 	board.current_player #to assign current player as player 1
 	puts "Do you want to play against an AI? (y/n)"
-	if ["y", "yes"].include?(gets.to_s.downcase)
+	if ["y", "yes"].include?(gets.to_s.downcase.strip)
 		board.AI_mode = "ON" #need to look at this
 	end
   loop do #keep looping until the game is done
