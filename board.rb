@@ -123,7 +123,7 @@ class Board
         end
       end
     end
-    if @in_a_col_counter == 3 
+    if @in_a_col_counter >= 3 
       puts "#{@piece} won with that vert column of #{piece}'s!"
       return true
     else
@@ -150,7 +150,7 @@ class Board
         end
       end
     end
-    if @in_a_row_counter == 3 
+    if @in_a_row_counter >= 3 
       puts "#{@piece} won with that horiz column of #{piece}'s!"
       return true
     else
@@ -181,7 +181,7 @@ class Board
         end
       end
     end
-    if @fwd_diag_counter == 3 
+    if @fwd_diag_counter >= 3 
       puts "#{@piece} won with that fwd diag of #{piece}'s!"
       return true
     else
@@ -212,7 +212,7 @@ class Board
         end
       end
     end
-    if @bwd_diag_counter == 3 
+    if @bwd_diag_counter >= 3 
       puts "#{@piece} won with that bwd diag column of #{piece}'s!"
       return true
     else
@@ -238,10 +238,10 @@ class Board
 
   def find_win
   	puts "checking for win"
-  	straight_check_row
-  	straight_check_col
-  	fwd_diag_check
-  	bwd_diag_check
+#  	straight_check_row
+#  	straight_check_col
+#  	fwd_diag_check
+#  	bwd_diag_check
   	if straight_check_row
   		puts "#{@piece}, you have won the game with 4 in a row"
   		return true
