@@ -6,10 +6,10 @@ class AI
 
   def pick_move(board)
     best_move = nil
-    best_score = -1_000_000
+    best_score = -10000000
     board.available_moves.each do |possible_move|
       test_board = board.make_move possible_move, player
-      score = minimax(test_board, 4, -100000, 100000, false)
+      score = minimax(test_board, 4, -100000, 100000, false)#hardcoded player to go first so computer always wants to minimize.
       if score > best_score
         best_move = possible_move
         best_score = score
@@ -26,7 +26,7 @@ class AI
   end
 
   private
-
+  	#actual heuristic score would make the code work much better. This is just a simple check for a semi intelligent computer
     def heuristic_score(board)
       count = 0
       0.upto(6) do |x|

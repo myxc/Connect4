@@ -1,0 +1,5 @@
+minimax computer wants to make move that minimizes possible loss/maximizes gain with the move it takes.
+Set depth to 4 to keep running times reasonable.
+The heuristics I've set could definitely be changed to more accurately reflect the quality of a certain move. 
+The AI looks in a 4x4 box around the piece, to make the ai work better, it should look around in a 4x4 box in every direction so it can check downwards, etc. because testing shows me that it misses winning opporunities sometimes. 
+The heuristics used here are simple to just make a guess for how board state will be without actually checking all game states for anything past 4 moves to make it less expensive.
